@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Big-Small Predictor + Register</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+    .header {
+      background-color: #d9534f;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    .card {
+      background: white;
+      padding: 10px;
+      margin: 10px auto;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      text-align: center;
+    }
+    .result {
+      font-size: 16px;
+      margin-top: 8px;
+    }
+    .small { color: green; }
+    .big { color: red; }
+    iframe {
+      width: 100%;
+      height: 70vh;
+      border: none;
+      margin-top: 10px;
+    }
+    input, button {
+      margin: 5px;
+      padding: 8px;
+      font-size: 16px;
+      width: 90%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #d9534f;
+      color: white;
+      cursor: pointer;
+      width: 95%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">AJAY BHAI</div>
+
+<div class="card">
+  <h2>Big-Small Predictor</h2>
+
+  <input type="text" id="period1" placeholder="Enter Period 1" />
+  <input type="number" id="result1" placeholder="Enter Result 1 (0-9)" min="0" max="9" />
+  <input type="text" id="period2" placeholder="Enter Period 2" />
+  <input type="number" id="result2" placeholder="Enter Result 2 (0-9)" min="0" max="9" />
+  <button onclick="updatePrediction()">Predict</button>
+
+  <div id="output">
+    <p>Enter data above and click Predict</p>
+  </div>
+</div>
+
+<iframe src="https://bdgbiz.com/#/register?invitationCode=523719361327"></iframe>
+
+<script>
+  const patternRules = {
+    "-4": "small",
+    "-3": "small",
+    "-1": "big",
+    "0": "small",
+    "1": "big",
+    "2": "small bigg pattern base",
+    "3": "big",
+    "4": "big",
+    "5": "big",
+    "6": "80% big",
+    "7": "80% big",
+    "8": "big 80% pattern base",
+    "9": "small",
+    "10": "80% big",
+    "11": "small big 80%",
+    "12": "small big pattern base",
+    "13": "big small",
+    "14": "big",
+    "15": "big",
+    "16": "80% big small",
+    "17": "small",
+    "18": "80% big small"
+  };
+
+  function predictByCustomLogic(period1, result1, period2, result2) {
+    const digitFromPeriod1 = parseInt(period1.slice(-3, -2));
+    const num1 = parseInt(result1);
+    const num2 = parseInt(result2);
+    const lastDigitPeriod2 = parseInt(period2.slice(-1));
+
+    let step1 = digitFromPeriod1 - num1;
+    let step2 = step1 + lastDigitPeriod2;
+    let finalValue = step2 + num2;
+
+    // Custom prediction from predefined rules
+    let prediction = patternRules.hasOwnProperty(finalValue)
+      ? patternRules[finalValue]
+      : finalValue >= 5 ? 'Big' : 'Small';
+
+    return {
+      step1,
+      step2,
+      finalValue,
+      prediction,
+      digitFromPeriod1,
+      lastDigitPeriod2
+    };
+  }
+
+  function incrementPeriod(period) {
+    let bigNum = BigInt(period);
+    return (bigNum + 1n).toString();
+  }
+
+  function updatePrediction() {
+    const period1Input = document.getElementById('period1');
+    const result1Input = document.getElementById('result1');
+    const period2Input = document.getElementById('period2');
+    const result2Input = document.getElementById('result2');
+
+    const period1 = period1Input.value.trim();
+    const result1 = result1Input.value.trim();
+    const period2 = period2Input.value.trim();
+    const result2 = result2Input.value.trim();
+
+    if (!period1 || !result1 || !period2 || !result2) {
+      alert("Please fill all fields correctly.");
+      return;
+    }
+
+    if (isNaN(result1) || isNaN(result2) || result1 < 0 || result1 > 9 || result2 < 0 || result2 > 9) {
+      alert("Results must be numbers between 0 and 9.");
+      return;
+    }
+
+    if (period1.length < 3 || period2.length < 1) {
+      alert("Period format seems invalid.");
+      return;
+    }
+
+    const result = predictByCustomLogic(period1, result1, period2, result2);
+
+    document.getElementById('output').innerHTML = `
+      <div class="result">
+        <strong>Step 1:</strong> (${result.digitFromPeriod1} - ${result1}) = ${result.step1}<br>
+        <strong>Step 2:</strong> ${result.step1} + ${result.lastDigitPeriod2} = ${result.step2}<br>
+        <strong>Step 3:</strong> ${result.step2} + ${result2} = ${result.finalValue}<br><br>
+        <strong>Prediction:</strong> 
+        <span class="${result.prediction.toLowerCase().includes('small') ? 'small' : 'big'}">
+          ${result.finalValue} - ${result.prediction}
+        </span> 
+      </div>
+    `;
+
+    period1Input.value = period2;
+    result1Input.value = result2;
+    period2Input.value = incrementPeriod(period2);
+    result2Input.value = '';
+  }
+</script>
+
+</body>
+</html>
